@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GF Global 工具箱</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Microsoft JhengHei','PingFang TC',Arial,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;font-size:14px;line-height:1.5}
+
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:14px 24px;display:flex;align-items:center;gap:20px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+.header h1{font-size:17px;font-weight:700;color:#58a6ff;white-space:nowrap}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab-btn{padding:7px 16px;border:1px solid #30363d;border-radius:6px;background:transparent;color:#8b949e;cursor:pointer;font-size:13px;font-family:inherit;transition:.15s}
+.tab-btn:hover{background:#21262d;color:#c9d1d9}
+.tab-btn.active{background:#1f6feb;border-color:#1f6feb;color:#fff}
+
+.container{padding:20px 24px;max-width:1200px;margin:0 auto}
+.panel{display:none}.panel.active{display:block}
+
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:20px;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:600;color:#e6edf3;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+.row{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.label{color:#8b949e;font-size:13px;white-space:nowrap}
+
+select,input[type=text],input[type=number],input[type=date]{
+  background:#0d1117;border:1px solid #30363d;border-radius:6px;
+  color:#c9d1d9;padding:6px 10px;font-size:13px;font-family:inherit;outline:none}
+select:focus,input:focus{border-color:#58a6ff}
+
+textarea{width:100%;background:#0d1117;border:1px solid #30363d;border-radius:6px;
+  color:#c9d1d9;padding:10px 12px;font-size:12px;font-family:'Consolas','Courier New',monospace;
+  resize:vertical;min-height:150px;outline:none;margin-top:8px}
+textarea:focus{border-color:#58a6ff}
+textarea::placeholder{color:#484f58}
+
+.btn{padding:7px 18px;border-radius:6px;border:1px solid;cursor:pointer;font-size:13px;font-family:inherit;font-weight:500;transition:.15s}
+.btn-green{background:#238636;border-color:#2ea043;color:#fff}.btn-green:hover{background:#2ea043}
+.btn-gray{background:transparent;border-color:#30363d;color:#c9d1d9}.btn-gray:hover{background:#21262d}
+.btn-blue{background:#1f6feb;border-color:#388bfd;color:#fff}.btn-blue:hover{background:#388bfd}
+
+.r-summary{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:6px;font-size:13px;font-weight:600;margin-bottom:4px}
+.r-pass{background:#0d4a23;border:1px solid #2ea043;color:#56d364}
+.r-fail{background:#3d1a1a;border:1px solid #f85149;color:#ff7b72}
+.r-warn{background:#2d2100;border:1px solid #d29922;color:#e3b341}
+
+.issue-list{background:#0d1117;border:1px solid #30363d;border-radius:6px;margin-bottom:12px;overflow:hidden}
+.issue-item{padding:7px 14px;border-bottom:1px solid #161b22;font-size:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+.issue-item:last-child{border-bottom:none}
+.issue-item.err{color:#ff7b72}.issue-item.warn{color:#e3b341}.issue-item.ok{color:#56d364}
+.badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.badge.err{background:#4d1919;color:#ff7b72}.badge.warn{background:#362000;color:#e3b341}.badge.ok{background:#0c2d1a;color:#56d364}
+.badge.new{background:#1a2d4d;color:#79c0ff}.badge.info{background:#1c1c2e;color:#8b949e}
+
+.dt{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.dt th{background:#21262d;color:#8b949e;padding:7px 10px;border:1px solid #30363d;font-weight:500;text-align:center;white-space:nowrap}
+.dt td{padding:6px 10px;border:1px solid #21262d;text-align:center;vertical-align:middle}
+.dt tbody tr:hover td{background:#161b22}
+.dt td.left{text-align:left}
+
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.chip{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.chip-ok{background:#0c2d1a;color:#56d364;border:1px solid #2ea043}
+.chip-miss{background:#3d1a1a;color:#ff7b72;border:1px solid #f85149}
+
+/* Upload zone */
+.upload-zone{border:2px dashed #30363d;border-radius:8px;padding:32px 24px;text-align:center;
+  cursor:pointer;transition:.15s;color:#8b949e;user-select:none}
+.upload-zone:hover,.upload-zone.drag{border-color:#58a6ff;background:#161b22;color:#c9d1d9}
+.upload-zone .icon{font-size:32px;margin-bottom:8px}
+.upload-zone p{font-size:13px;line-height:1.6}
+
+/* File status */
+.file-tag{display:inline-flex;align-items:center;gap:6px;background:#21262d;
+  border:1px solid #30363d;border-radius:6px;padding:5px 12px;font-size:12px;color:#c9d1d9}
+
+/* Item search */
+.search-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search-inp{flex:1;min-width:200px;background:#0d1117;border:1px solid #30363d;
+  border-radius:6px;color:#c9d1d9;padding:7px 12px;font-size:13px;font-family:inherit;outline:none}
+.search-inp:focus{border-color:#58a6ff}
+
+/* Item history table */
+.price-same{color:#56d364}.price-diff{color:#ff7b72;font-weight:700}
+.qty-diff{color:#ff7b72;font-weight:700}
+
+/* Stat grid */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:14px 16px;text-align:center}
+.stat-lbl{font-size:11px;color:#8b949e;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700;color:#e6edf3}
+.stat-val small{font-size:13px;color:#8b949e;font-weight:400}
+.stat-sub{font-size:11px;margin-top:3px;color:#8b949e}
+.c-green{color:#56d364}.c-red{color:#ff7b72}.c-yellow{color:#e3b341}
+.pbar{background:#21262d;border-radius:4px;height:6px;margin-top:8px;overflow:hidden}
+.pfill-g{height:100%;background:#238636;border-radius:4px;transition:width .3s}
+.pfill-r{height:100%;background:#da3633;border-radius:4px;transition:width .3s}
+
+.day-inp{width:88px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;padding:4px 7px;font-size:12px;text-align:right;font-family:inherit}
+.day-inp:focus{border-color:#58a6ff;outline:none}
+.day-inp::placeholder{color:#484f58}
+
+.section-head{font-size:12px;font-weight:600;color:#8b949e;text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px}
+.help-text{color:#8b949e;font-size:12px;margin-top:4px}
+
+/* 7-day grid for rotation */
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:12px 0}
+.day-col{background:#0d1117;border:1px solid #30363d;border-radius:6px;overflow:hidden}
+.day-col-head{padding:6px 8px;text-align:center;font-size:11px;font-weight:700;background:#21262d}
+.day-col-head.rotation{background:#1a3a6e;color:#79c0ff}
+.day-col-head.base{background:#1c2c1c;color:#56d364}
+.day-item{padding:5px 7px;border-top:1px solid #21262d;font-size:11px;line-height:1.4}
+.day-item.is-new{background:#0c2d1a;color:#56d364}
+.day-item.is-removed{background:#2d0a0a;color:#ff7b72}
+.day-item.is-common{color:#c9d1d9}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>⚙️ GF Global 工具箱</h1>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('alchemy')">🔮 煉金驗證</button>
+    <button class="tab-btn" onclick="switchTab('item')">📦 Item 驗證</button>
+    <button class="tab-btn" onclick="switchTab('revenue')">📊 週目標追蹤</button>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ===== 煉金驗證 ===== -->
+<div id="panel-alchemy" class="panel active">
+  <div class="card">
+    <div class="card-title">🔮 煉金表驗證</div>
+    <div class="row">
+      <span class="label">煉金類型：</span>
+      <select id="aly-type">
+        <option value="normal">一般煉金週表</option>
+        <option value="magic">魔化煉金</option>
+        <option value="high">高階煉金</option>
+        <option value="go">煉金 GO</option>
+      </select>
+      <span class="label" style="margin-left:12px">週別：</span>
+      <input type="text" id="aly-week" placeholder="例：0716" style="width:80px">
+    </div>
+    <span class="label">從 Excel 複製資料貼上（須含標題列）：</span>
+    <textarea id="aly-input"
+      placeholder="抽獎編號&#9;商品序號&#9;出現星期&#9;掉落區段&#9;商品編號&#9;堆疊數量&#9;掉落機率&#9;JackPot&#9;備註&#9;當回煉金&#10;12345&#9;1&#9;&#9;0&#9;111&#9;1&#9;1&#9;&#9;主打道具&#9;&#10;12345&#9;1&#9;1&#9;1&#9;222&#9;1&#9;0.3&#9;&#9;稀有道具&#9;True&#10;..."></textarea>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-green" onclick="validateAlchemy()">開始驗證</button>
+      <button class="btn btn-gray" onclick="clearAlchemy()">清除</button>
+      <span id="aly-count" style="color:#8b949e;font-size:12px"></span>
+    </div>
+  </div>
+  <div id="aly-result"></div>
+</div>
+
+<!-- ===== Item 驗證 ===== -->
+<div id="panel-item" class="panel">
+  <div class="card">
+    <div class="card-title">📦 Item Mall SQL 驗證</div>
+
+    <!-- Mode toggle -->
+    <div class="row" style="margin-bottom:14px">
+      <button class="btn btn-blue" id="mode-btn-paste" onclick="setItemMode('paste')">✏️ 貼上 SQL</button>
+      <button class="btn btn-gray" id="mode-btn-file" onclick="setItemMode('file')">📂 上傳檔案</button>
+      <span style="color:#8b949e;font-size:12px">支援 INSERT INTO itemmall VALUES 格式</span>
+    </div>
+
+    <!-- Paste mode -->
+    <div id="item-paste-area">
+      <span class="label">貼上 SQL 資料（可包含 CREATE TABLE / DROP / INSERT 全文）：</span>
+      <textarea id="item-sql" style="min-height:180px;margin-top:8px"
+        placeholder="INSERT INTO itemmall VALUES (47128,99,1,1,1,9,0,1,0,0,0,0,'',0,0,'');&#10;INSERT INTO itemmall VALUES (56522,98,1,1,1,150,0,1,2026071613,2026072313,0,0,'',0,0,'');&#10;..."></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-green" onclick="analyzeSQL(document.getElementById('item-sql').value)">開始驗證</button>
+        <button class="btn btn-gray" onclick="document.getElementById('item-sql').value='';document.getElementById('item-result').innerHTML='';document.getElementById('item-search-card').style.display='none'">清除</button>
+        <span id="item-parse-count" style="color:#8b949e;font-size:12px"></span>
+      </div>
+    </div>
+
+    <!-- File mode -->
+    <div id="item-file-area" style="display:none">
+      <div class="upload-zone" id="upload-zone"
+           onclick="document.getElementById('item-file').click()"
+           ondragover="event.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleItemDrop(event)">
+        <input type="file" id="item-file" accept=".sql,.txt,.xlsx,.xlsm" style="display:none" onchange="loadItemFile(this)">
+        <div class="icon">📂</div>
+        <p>點擊或拖放檔案<br><span style="font-size:11px;color:#484f58">SQL 轉檔（.sql/.txt）或 Excel（.xlsx/.xlsm）</span></p>
+      </div>
+      <div id="item-file-status" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="card" id="item-search-card" style="display:none">
+    <div class="card-title">🔍 查詢商品</div>
+    <div class="search-bar">
+      <input class="search-inp" id="item-search" placeholder="輸入商品編號（item_id）…" onkeydown="if(event.key==='Enter')searchItem()">
+      <button class="btn btn-blue" onclick="searchItem()">查詢</button>
+      <button class="btn btn-gray" onclick="document.getElementById('item-search').value='';document.getElementById('item-search-result').innerHTML=''">清除</button>
+    </div>
+    <div id="item-search-result" style="margin-top:12px"></div>
+  </div>
+
+  <div id="item-result"></div>
+</div>
+
+<!-- ===== 週目標追蹤 ===== -->
+<div id="panel-revenue" class="panel">
+  <div class="card">
+    <div class="card-title">⚙️ 設定</div>
+    <div class="row">
+      <span class="label">週起始日（週三）：</span>
+      <input type="date" id="rev-date" onchange="buildRevTable()">
+      <span class="label" style="margin-left:12px">週目標：</span>
+      <input type="number" id="rev-target" placeholder="150" style="width:100px" min="0" step="0.1" oninput="updateRevenue()">
+      <span class="label">萬元</span>
+    </div>
+    <div class="help-text">週期：週三 → 週二｜各日占比依歷史正常週推算</div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 每日追蹤</div>
+    <div style="overflow-x:auto">
+      <table class="dt" id="rev-table">
+        <thead><tr>
+          <th>日期</th><th>星期</th><th>歷史占比</th>
+          <th>目標（萬）</th><th>實際（萬）</th>
+          <th>當日差異</th><th>累計目標</th><th>累計實際</th>
+        </tr></thead>
+        <tbody id="rev-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="rev-summary"></div>
+</div>
+
+</div>
+
+<script>
+// ──────────────────────────────────────────────────────────
+// Shared
+// ──────────────────────────────────────────────────────────
+function switchTab(n){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+n).classList.add('active');
+  document.querySelectorAll('.tab-btn')[['alchemy','item','revenue'].indexOf(n)].classList.add('active');
+}
+
+function parseTSV(text){
+  return text.trim().split('\n').map(l=>l.split('\t').map(c=>c.trim())).filter(r=>r.some(c=>c!==''));
+}
+
+function findCol(headers,...names){
+  for(const n of names){
+    const i=headers.findIndex(h=>String(h).trim()===n||String(h).trim().toLowerCase()===n.toLowerCase());
+    if(i>=0)return i;
+  }
+  return -1;
+}
+
+function alertBox(type,msg){
+  const cls={pass:'r-pass',fail:'r-fail',warn:'r-warn'}[type];
+  const icon={pass:'✅',fail:'❌',warn:'⚠️'}[type];
+  return `<div class="r-summary ${cls}">${icon} ${msg}</div>`;
+}
+
+function issueBlock(items,cls,label){
+  if(!items.length)return'';
+  let h=`<div class="section-head">${label}（${items.length}）</div><div class="issue-list">`;
+  items.forEach(m=>{
+    h+=`<div class="issue-item ${cls}"><span class="badge ${cls}">${label.replace(/（.*）/,'')}</span><span>${m}</span></div>`;
+  });
+  return h+'</div>';
+}
+
+// ──────────────────────────────────────────────────────────
+// ALCHEMY VALIDATION
+// ──────────────────────────────────────────────────────────
+const ALY_MAP={
+  '抽獎編號':'did','商品序號':'seq','出現星期':'wd','掉落區段':'sec',
+  '商品編號':'iid','堆疊數量':'qty','掉落機率':'prob',
+  'jackpot':'jp','JackPot':'jp','備註':'note','當回煉金':'cur',
+  '是否公告':'ann','go填表':'gop','GO填表':'gop'
+};
+
+function detectAlyCols(headers){
+  const m={};
+  headers.forEach((h,i)=>{
+    const key=ALY_MAP[h.trim()]||ALY_MAP[h.trim().toLowerCase()];
+    if(key)m[key]=i;
+  });
+  return m;
+}
+
+function validateAlchemy(){
+  const text=document.getElementById('aly-input').value;
+  const type=document.getElementById('aly-type').value;
+  const isGO=type==='go';
+  const res=document.getElementById('aly-result');
+
+  if(!text.trim()){res.innerHTML=alertBox('warn','請貼上煉金表資料');return;}
+  const rows=parseTSV(text);
+  if(rows.length<2){res.innerHTML=alertBox('fail','資料列數不足，請確認已含標題列');return;}
+
+  const headers=rows[0];
+  const C=detectAlyCols(headers);
+  const data=rows.slice(1);
+  document.getElementById('aly-count').textContent=`共 ${data.length} 筆`;
+
+  const missing=['sec','prob'].filter(k=>C[k]===undefined);
+  if(missing.length){
+    const nm={sec:'掉落區段',prob:'掉落機率'};
+    res.innerHTML=alertBox('fail',`找不到欄位：${missing.map(k=>nm[k]).join('、')}，請確認標題列`);
+    return;
+  }
+
+  const errors=[],warns=[];
+  const probGroups={};
+  const wdPresent={};
+
+  data.forEach((row,idx)=>{
+    const ln=idx+2;
+    const did=C.did!==undefined?row[C.did]:'?';
+    const wd=C.wd!==undefined?row[C.wd]:'';
+    const sec=C.sec!==undefined?row[C.sec]:'';
+    const probStr=C.prob!==undefined?row[C.prob]:'';
+    const prob=parseFloat(probStr);
+    const qty=C.qty!==undefined?row[C.qty]:'';
+
+    if(qty!==''){const q=parseInt(qty);if(isNaN(q)||q<=0)errors.push(`第 ${ln} 列：堆疊數量「${qty}」應為正整數`);}
+
+    if(sec==='0'){
+      if(!isNaN(prob)&&prob!==1)warns.push(`第 ${ln} 列（JackPot 區段 0）：機率填 ${prob}，建議填 1`);
+      return;
+    }
+
+    if(probStr===''||isNaN(prob)){errors.push(`第 ${ln} 列：掉落機率「${probStr}」無法解析`);return;}
+
+    if(isGO&&C.gop!==undefined){
+      const gopStr=row[C.gop];
+      if(gopStr&&gopStr!==''){
+        const gop=parseFloat(gopStr);
+        const exp=Math.round(prob/1.5*1000)/1000;
+        if(!isNaN(gop)&&Math.abs(gop-exp)>0.002)
+          errors.push(`第 ${ln} 列：GO填表 ${gop}，應為 ${exp.toFixed(3)}（${prob} ÷ 1.5）`);
+      }
+    }
+
+    if(wd!==''){
+      if(!wdPresent[did])wdPresent[did]=new Set();
+      wdPresent[did].add(wd);
+    }
+
+    const gk=`${did}||${wd}||${sec}`;
+    if(!probGroups[gk])probGroups[gk]={did,wd,sec,probs:[],lines:[]};
+    probGroups[gk].probs.push(prob);
+    probGroups[gk].lines.push(ln);
+  });
+
+  Object.values(probGroups).forEach(g=>{
+    const sum=g.probs.reduce((a,b)=>a+b,0);
+    const r=Math.round(sum*1000)/1000;
+    const wdlbl=g.wd===''?'(全週)':`星期${g.wd}`;
+    if(Math.abs(r-100)>0.05)
+      errors.push(`【機率錯誤】抽獎 ${g.did} ${wdlbl} 區段 ${g.sec}：合計 ${r.toFixed(3)}%（差 ${(100-r).toFixed(3)}%）`);
+  });
+
+  // Weekday coverage check
+  const wdCoverage={};
+  Object.entries(wdPresent).forEach(([did,wds])=>{
+    wdCoverage[did]={};
+    ['1','2','3','4','5','6','7'].forEach(d=>{
+      const ok=wds.has(d);
+      wdCoverage[did][d]=ok;
+      if(!ok)errors.push(`抽獎 ${did}：缺少「星期 ${d}（${'一二三四五六日'[parseInt(d)-1]}）」的掉落設定`);
+    });
+  });
+
+  // ── Render ──
+  let html='';
+  if(!errors.length){
+    html+=alertBox('pass',`驗證通過！${data.length} 筆資料，${Object.keys(probGroups).length} 個機率群組全部正確${warns.length?`，${warns.length} 個警告`:''}`)
+  } else {
+    html+=alertBox('fail',`發現 ${errors.length} 個錯誤${warns.length?`、${warns.length} 個警告`:''}，${data.length} 筆資料`);
+  }
+  html+='<div style="height:10px"></div>';
+
+  // Weekday coverage chips
+  if(Object.keys(wdCoverage).length){
+    html+=`<div class="card"><div class="card-title">出現星期涵蓋</div>`;
+    Object.entries(wdCoverage).forEach(([did,cov])=>{
+      html+=`<div style="margin-bottom:10px"><span style="color:#8b949e;font-size:12px">抽獎編號 ${did}</span>
+      <div class="chips">`;
+      ['1','2','3','4','5','6','7'].forEach(d=>{
+        const lbl='一二三四五六日'[parseInt(d)-1];
+        html+=cov[d]
+          ?`<span class="chip chip-ok">週${lbl} ✓</span>`
+          :`<span class="chip chip-miss">週${lbl} 缺</span>`;
+      });
+      html+='</div></div>';
+    });
+    html+='</div>';
+  }
+
+  // Error / warn lists
+  if(errors.length)html+=`<div class="card">${issueBlock(errors,'err','錯誤')}</div>`;
+  if(warns.length) html+=`<div class="card">${issueBlock(warns,'warn','警告')}</div>`;
+
+  // Probability group table
+  if(Object.keys(probGroups).length){
+    html+=`<div class="card"><div class="card-title">機率群組明細</div>
+    <div style="overflow-x:auto"><table class="dt">
+    <thead><tr><th>抽獎編號</th><th>出現星期</th><th>掉落區段</th><th>筆數</th><th>機率合計</th><th>狀態</th></tr></thead>
+    <tbody>`;
+    Object.values(probGroups).sort((a,b)=>{
+      if(a.did!==b.did)return String(a.did).localeCompare(String(b.did));
+      if(a.wd!==b.wd)return parseInt(a.wd||0)-parseInt(b.wd||0);
+      return parseInt(a.sec)-parseInt(b.sec);
+    }).forEach(g=>{
+      const sum=g.probs.reduce((a,b)=>a+b,0);
+      const r=Math.round(sum*1000)/1000;
+      const ok=Math.abs(r-100)<=0.05;
+      const wdlbl=g.wd===''?'全週':`週${'一二三四五六日'[parseInt(g.wd)-1]||g.wd}`;
+      html+=`<tr>
+        <td>${g.did}</td><td>${wdlbl}</td><td>${g.sec}</td><td>${g.probs.length}</td>
+        <td style="color:${ok?'#56d364':'#ff7b72'};font-weight:600">${r.toFixed(3)}%</td>
+        <td>${ok?'✅':'❌'}</td></tr>`;
+    });
+    html+='</tbody></table></div></div>';
+  }
+
+  // ── 週日~週二 更換品項分析 ──
+  html += buildRotationHTML(data, C);
+
+  res.innerHTML=html;
+}
+
+function buildRotationHTML(data, C){
+  if(C.wd===undefined) return '';
+
+  // Collect items per weekday (exclude JackPot sec=0)
+  const byDay={}; // wd → [{iid,name,qty,prob,isNew,sec,seq}]
+
+  data.forEach(row=>{
+    const wd=C.wd!==undefined?row[C.wd]:'';
+    const sec=C.sec!==undefined?row[C.sec]:'';
+    if(!wd||sec==='')return;
+    if(sec==='0')return;
+
+    if(!byDay[wd])byDay[wd]=[];
+    byDay[wd].push({
+      iid: C.iid!==undefined?row[C.iid]:'',
+      name: C.note!==undefined?row[C.note]:'',
+      qty: C.qty!==undefined?row[C.qty]:'',
+      prob: parseFloat(C.prob!==undefined?row[C.prob]:0)||0,
+      isNew: (C.cur!==undefined?row[C.cur]:'').toLowerCase()==='true',
+      sec, seq: C.seq!==undefined?row[C.seq]:''
+    });
+  });
+
+  if(!Object.keys(byDay).length) return '';
+
+  // 週日(7)/週一(1)/週二(2) vs 週三(3)~週六(6)
+  const rotKeys=['7','1','2'];
+  const baseKeys=['3','4','5','6'];
+
+  const rotIds=new Set();
+  const baseIds=new Set();
+  rotKeys.forEach(d=>(byDay[d]||[]).forEach(i=>rotIds.add(i.iid)));
+  baseKeys.forEach(d=>(byDay[d]||[]).forEach(i=>baseIds.add(i.iid)));
+
+  const addedIds=[...rotIds].filter(id=>!baseIds.has(id));
+  const removedIds=[...baseIds].filter(id=>!rotIds.has(id));
+  const keptIds=[...rotIds].filter(id=>baseIds.has(id));
+
+  // ── HTML ──
+  let h=`<div class="card"><div class="card-title">🔄 週日～週二 更換品項分析</div>`;
+
+  // Summary badges
+  h+=`<div class="row" style="margin-bottom:16px;gap:8px">
+    <div style="background:#0c2d1a;border:1px solid #2ea043;border-radius:6px;padding:7px 14px;font-size:12px;color:#56d364;font-weight:600">＋ 新增 ${addedIds.length} 項</div>
+    <div style="background:#3d1a1a;border:1px solid #f85149;border-radius:6px;padding:7px 14px;font-size:12px;color:#ff7b72;font-weight:600">－ 移除 ${removedIds.length} 項</div>
+    <div style="background:#21262d;border:1px solid #30363d;border-radius:6px;padding:7px 14px;font-size:12px;color:#8b949e;font-weight:600">＝ 保留 ${keptIds.length} 項</div>
+  </div>`;
+
+  // 7-day item grid
+  h+=`<div class="section-head">各日品項一覽（藍框=週日~週二換品窗口）</div>
+  <div class="day-grid">`;
+
+  const ALL_DAYS=[
+    {d:'3',lbl:'週三',rot:false},
+    {d:'4',lbl:'週四',rot:false},
+    {d:'5',lbl:'週五',rot:false},
+    {d:'6',lbl:'週六',rot:false},
+    {d:'7',lbl:'週日',rot:true},
+    {d:'1',lbl:'週一',rot:true},
+    {d:'2',lbl:'週二',rot:true},
+  ];
+
+  ALL_DAYS.forEach(({d,lbl,rot})=>{
+    const items=(byDay[d]||[]).sort((a,b)=>parseInt(a.sec)-parseInt(b.sec)||parseInt(a.seq||0)-parseInt(b.seq||0));
+    const headCls=rot?'day-col-head rotation':'day-col-head base';
+    h+=`<div class="day-col">
+      <div class="${headCls}">${lbl}</div>`;
+    if(!items.length){
+      h+=`<div class="day-item" style="color:#484f58;font-size:10px;text-align:center;padding:8px">無資料</div>`;
+    } else {
+      items.forEach(item=>{
+        const isAdded=rot&&addedIds.includes(item.iid);
+        const isRemoved=!rot&&removedIds.includes(item.iid);
+        const cls=isAdded?'day-item is-new':isRemoved?'day-item is-removed':'day-item is-common';
+        const newBadge=item.isNew?' 🆕':'';
+        h+=`<div class="${cls}" title="${item.iid}">
+          <div style="font-size:10px;color:#8b949e">區${item.sec} ${item.prob}%</div>
+          <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px">${item.name||item.iid}${newBadge}</div>
+        </div>`;
+      });
+    }
+    h+='</div>';
+  });
+  h+='</div>';
+
+  // New items detail list
+  if(addedIds.length){
+    h+=`<div class="section-head">🆕 新增品項（只出現在週日/週一/週二）</div><div class="issue-list">`;
+    rotKeys.forEach(d=>{
+      const dayName='日一二'[rotKeys.indexOf(d)];
+      (byDay[d]||[]).filter(i=>addedIds.includes(i.iid)).forEach(item=>{
+        const probClass=item.isNew&&(item.prob<0.1||item.prob>5)?'color:#ff7b72':'color:#56d364';
+        h+=`<div class="issue-item ok">
+          <span class="badge ok">新增</span>
+          <span>週${dayName} | 區段${item.sec} | <b>${item.iid}</b> ${item.name} | ×${item.qty} | 機率 <span style="${probClass}">${item.prob}%</span>${item.isNew?' 🆕當回煉金':''}</span>
+        </div>`;
+      });
+    });
+    h+='</div>';
+  }
+
+  // Removed items detail list
+  if(removedIds.length){
+    h+=`<div class="section-head">🗑 移除品項（週三~週六有，週日~週二無）</div><div class="issue-list">`;
+    baseKeys.forEach(d=>{
+      const dayName='三四五六'[baseKeys.indexOf(d)];
+      (byDay[d]||[]).filter(i=>removedIds.includes(i.iid)).forEach(item=>{
+        h+=`<div class="issue-item warn">
+          <span class="badge warn">移除</span>
+          <span>週${dayName} | 區段${item.sec} | <b>${item.iid}</b> ${item.name} | ×${item.qty} | 機率 ${item.prob}%</span>
+        </div>`;
+      });
+    });
+    h+='</div>';
+  }
+
+  // 當回煉金 cross-check: should appear in both windows
+  const curItems=[];
+  Object.entries(byDay).forEach(([d,items])=>{
+    items.filter(i=>i.isNew).forEach(i=>{
+      if(!curItems.find(x=>x.iid===i.iid&&x.d===d))
+        curItems.push({d,dayName:'一二三四五六日'[parseInt(d)-1],iid:i.iid,name:i.name,prob:i.prob,sec:i.sec});
+    });
+  });
+
+  if(curItems.length){
+    h+=`<div class="section-head">📋 當回煉金（True）品項彙整</div><div class="issue-list">`;
+    curItems.forEach(item=>{
+      const probOk=item.prob>=0.05&&item.prob<=5;
+      const cls=probOk?'ok':'warn';
+      h+=`<div class="issue-item ${cls}">
+        <span class="badge ${cls}">當回</span>
+        <span>週${item.dayName} 區段${item.sec} | <b>${item.iid}</b> ${item.name} | 機率 <b>${item.prob}%</b>${probOk?'':' ⚠️機率異常（建議 0.05%~5%）'}</span>
+      </div>`;
+    });
+    h+='</div>';
+  }
+
+  h+='</div>';
+  return h;
+}
+
+function clearAlchemy(){
+  document.getElementById('aly-input').value='';
+  document.getElementById('aly-result').innerHTML='';
+  document.getElementById('aly-count').textContent='';
+}
+
+// ──────────────────────────────────────────────────────────
+// ITEM SQL VALIDATION
+// ──────────────────────────────────────────────────────────
+function loadXLSX(cb){
+  if(window.XLSX){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+  s.onload=cb;
+  s.onerror=()=>alert('SheetJS 載入失敗，請確認網路連線');
+  document.head.appendChild(s);
+}
+// SQL columns: item_id,item_group,item_index,item_num,money_unit,point,
+//              special_price,sell,on_sell_date,not_sell_date,account_num_limit,
+//              recognized_percentage,fortune_bag,allow_buy_level,new_account_day_limit,note
+let itemDB={};
+let prevRecords=[];
+
+// ── Mode toggle ──
+function setItemMode(mode){
+  const isPaste=mode==='paste';
+  document.getElementById('item-paste-area').style.display=isPaste?'':'none';
+  document.getElementById('item-file-area').style.display=isPaste?'none':'';
+  document.getElementById('mode-btn-paste').className='btn '+(isPaste?'btn-blue':'btn-gray');
+  document.getElementById('mode-btn-file').className='btn '+(isPaste?'btn-gray':'btn-blue');
+}
+
+// ── File upload (SQL or Excel) ──
+function handleItemDrop(e){
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  const file=e.dataTransfer.files[0];
+  if(file)loadItemFile({files:[file]});
+}
+
+function loadItemFile(input){
+  const file=input.files[0];
+  if(!file)return;
+  const status=document.getElementById('item-file-status');
+  status.innerHTML=`<span class="file-tag">⏳ 載入 ${file.name}...</span>`;
+
+  const isExcel=/\.(xlsx|xlsm)$/i.test(file.name);
+
+  if(isExcel){
+    status.innerHTML=`<span class="file-tag">⏳ 載入 SheetJS...</span>`;
+    loadXLSX(()=>{
+      const reader=new FileReader();
+      reader.onload=function(e){
+        try{
+          const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+          status.innerHTML=`<span class="file-tag">✅ ${file.name}（Excel，${wb.SheetNames.length} 張工作表）</span>`;
+          status.innerHTML+=`<div style="color:#e3b341;font-size:12px;margin-top:6px">⚠️ Excel 模式：請切換到「貼上 SQL」模式使用 SQL 轉檔資料以獲得完整驗證</div>`;
+        }catch(err){
+          status.innerHTML=`<span class="file-tag" style="color:#ff7b72">❌ 載入失敗：${err.message}</span>`;
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  } else {
+    // Text-based SQL file
+    const reader=new FileReader();
+    reader.onload=function(e){
+      const text=e.target.result;
+      status.innerHTML=`<span class="file-tag">✅ ${file.name}（${text.length.toLocaleString()} 字元）</span>`;
+      analyzeSQL(text);
+    };
+    reader.readAsText(file,'UTF-8');
+  }
+}
+
+// ── SQL Parser ──
+function parseSQLInserts(text){
+  const records=[];
+  const upper=text.toUpperCase();
+  const marker='INSERT INTO ITEMMALL VALUES';
+  let i=0;
+
+  while(i<text.length){
+    const pos=upper.indexOf(marker,i);
+    if(pos<0)break;
+
+    // find opening paren
+    let p=text.indexOf('(',pos+marker.length);
+    if(p<0)break;
+
+    // walk to matching closing paren, respecting single-quoted strings
+    let j=p+1,depth=1,inQ=false;
+    while(j<text.length&&depth>0){
+      const c=text[j];
+      if(c==="'"&&!inQ){inQ=true;}
+      else if(c==="'"&&inQ){
+        if(text[j+1]==="'")j++; // escaped ''
+        else inQ=false;
+      } else if(!inQ){
+        if(c==='(')depth++;
+        else if(c===')')depth--;
+      }
+      j++;
+    }
+
+    if(depth===0){
+      const valStr=text.slice(p+1,j-1);
+      const rec=parseSQLValues(valStr,records.length+1);
+      if(rec)records.push(rec);
+    }
+    i=j;
+  }
+  return records;
+}
+
+function parseSQLValues(str,lineNum){
+  const vals=[];
+  let cur='',inQ=false;
+  for(let i=0;i<str.length;i++){
+    const c=str[i];
+    if(c==="'"&&!inQ){inQ=true;continue;}
+    if(c==="'"&&inQ){
+      if(str[i+1]==="'"){cur+="'";i++;continue;}
+      inQ=false;continue;
+    }
+    if(c===','&&!inQ){vals.push(cur.trim());cur='';continue;}
+    cur+=c;
+  }
+  vals.push(cur.trim());
+  if(vals.length<10)return null;
+  return {
+    item_id:      vals[0],
+    item_group:   vals[1],
+    item_index:   vals[2],
+    item_num:     vals[3],   // 堆疊數量
+    money_unit:   vals[4],
+    point:        vals[5],   // 販賣點數
+    special_price:vals[6],   // 特價
+    sell:         vals[7],   // 是否上架
+    on_date:      vals[8],   // 上架時間
+    off_date:     vals[9],   // 下架時間
+    acct_limit:   vals[10]||'0',
+    recog_pct:    vals[11]||'0',
+    fortune_bag:  vals[12]||'',
+    allow_level:  vals[13]||'0',
+    new_acct_day: vals[14]||'0',
+    note:         vals[15]||'',
+    lineNum,
+  };
+}
+
+// ── Main analyzer ──
+function analyzeSQL(text){
+  if(!text||!text.trim()){
+    document.getElementById('item-result').innerHTML=alertBox('warn','請貼上或載入 SQL 資料');
+    return;
+  }
+
+  const records=parseSQLInserts(text);
+  document.getElementById('item-parse-count').textContent=`解析 ${records.length} 筆`;
+
+  if(!records.length){
+    document.getElementById('item-result').innerHTML=alertBox('fail','找不到 INSERT INTO itemmall VALUES 語句，請確認格式');
+    return;
+  }
+
+  // Build itemDB
+  itemDB={};
+  records.forEach(r=>{
+    const id=r.item_id;
+    if(!itemDB[id])itemDB[id]={entries:[]};
+    itemDB[id].entries.push(r);
+  });
+
+  const errors=[],warns=[];
+
+  // 1. Duplicate primary key: (item_group, item_index, money_unit)
+  const pkSeen={};
+  records.forEach(r=>{
+    const pk=`${r.item_group}|${r.item_index}|${r.money_unit}`;
+    if(pkSeen[pk]){
+      errors.push(`重複主鍵 (group=${r.item_group}, index=${r.item_index}, money=${r.money_unit})：第 ${pkSeen[pk]} 筆 與 第 ${r.lineNum} 筆 衝突`);
+    } else {
+      pkSeen[pk]=r.lineNum;
+    }
+  });
+
+  // 2. Date format errors (should be 0 or 10-digit number)
+  const dateRe=/^(0|\d{10})$/;
+  records.forEach(r=>{
+    const on=r.on_date.replace(/\s/g,'');
+    const off=r.off_date.replace(/\s/g,'');
+    if(!dateRe.test(on))
+      errors.push(`第 ${r.lineNum} 筆 item_id=${r.item_id}：上架時間「${r.on_date}」格式錯誤，應為 0 或 10 位 YYYYMMDDHH`);
+    if(!dateRe.test(off))
+      errors.push(`第 ${r.lineNum} 筆 item_id=${r.item_id}：下架時間「${r.off_date}」格式錯誤`);
+    // group 98 = 期間限定，必須有下架時間
+    if(r.item_group==='98'&&(off==='0'||off===''))
+      errors.push(`第 ${r.lineNum} 筆 item_id=${r.item_id}：類別 98（期間限定）缺少下架時間`);
+  });
+
+  // 3. Blank/space in numeric fields
+  records.forEach(r=>{
+    ['point','item_num','sell'].forEach(f=>{
+      if(/^\s+$/.test(r[f])||r[f]==='')
+        errors.push(`第 ${r.lineNum} 筆 item_id=${r.item_id}：欄位「${f}」值為空白`);
+    });
+  });
+
+  // 4. Same item_id inconsistent price / qty (exclude point=9 special)
+  const priceIssues=[],qtyIssues=[];
+  Object.entries(itemDB).forEach(([id,info])=>{
+    if(info.entries.length<2)return;
+    const prices=[...new Set(info.entries.filter(e=>e.point!=='9'&&e.point.trim()!=='').map(e=>e.point))];
+    if(prices.length>1)priceIssues.push({id,prices,entries:info.entries});
+    const qtys=[...new Set(info.entries.map(e=>e.item_num.trim()).filter(Boolean))];
+    if(qtys.length>1)qtyIssues.push({id,qtys,entries:info.entries});
+  });
+
+  // ── Render ──
+  const totalItems=Object.keys(itemDB).length;
+  let html='';
+
+  if(!errors.length&&!priceIssues.length&&!qtyIssues.length){
+    html+=alertBox('pass',`驗證通過！${records.length} 筆資料，${totalItems} 種商品，未發現異常`);
+  } else {
+    const errCount=errors.length+priceIssues.length+qtyIssues.length;
+    html+=alertBox('fail',`發現 ${errors.length} 個格式錯誤，${priceIssues.length} 項價格不一致，${qtyIssues.length} 項數量不一致`);
+  }
+
+  html+=`<div class="card" style="margin-top:12px"><div class="card-title">📊 分析結果</div>`;
+  html+=`<div class="stat-grid">
+    <div class="stat"><div class="stat-lbl">總筆數</div><div class="stat-val">${records.length}<small>筆</small></div></div>
+    <div class="stat"><div class="stat-lbl">商品種類</div><div class="stat-val">${totalItems}<small>種</small></div></div>
+    <div class="stat"><div class="stat-lbl">格式/主鍵錯誤</div><div class="stat-val ${errors.length?'c-red':'c-green'}">${errors.length}</div></div>
+    <div class="stat"><div class="stat-lbl">價格不一致</div><div class="stat-val ${priceIssues.length?'c-red':'c-green'}">${priceIssues.length}<small>項</small></div></div>
+    <div class="stat"><div class="stat-lbl">數量不一致</div><div class="stat-val ${qtyIssues.length?'c-red':'c-green'}">${qtyIssues.length}<small>項</small></div></div>
+  </div>`;
+
+  if(errors.length)html+=issueBlock(errors,'err','錯誤');
+
+  // Price issues table
+  if(priceIssues.length){
+    html+=`<div class="section-head">💰 同商品不同 point（${priceIssues.length} 項）</div>
+    <div style="overflow-x:auto"><table class="dt">
+    <thead><tr><th>item_id</th><th>出現 point 值</th><th>筆數</th><th>各筆 group/index → point</th></tr></thead><tbody>`;
+    priceIssues.forEach(p=>{
+      const detail=p.entries.map(e=>`g${e.item_group}[${e.item_index}]=${e.point}`).join(' ');
+      html+=`<tr><td><b>${p.id}</b></td><td class="price-diff">${p.prices.join(' / ')}</td><td>${p.entries.length}</td><td class="left" style="font-size:11px;color:#8b949e">${detail}</td></tr>`;
+    });
+    html+='</tbody></table></div>';
+  }
+
+  // Qty issues table
+  if(qtyIssues.length){
+    html+=`<div class="section-head" style="margin-top:14px">📦 同商品不同 item_num（${qtyIssues.length} 項）</div>
+    <div style="overflow-x:auto"><table class="dt">
+    <thead><tr><th>item_id</th><th>出現數量</th><th>筆數</th><th>各筆 group/index → qty</th></tr></thead><tbody>`;
+    qtyIssues.forEach(p=>{
+      const detail=p.entries.map(e=>`g${e.item_group}[${e.item_index}]=${e.item_num}`).join(' ');
+      html+=`<tr><td><b>${p.id}</b></td><td class="qty-diff">${p.qtys.join(' / ')}</td><td>${p.entries.length}</td><td class="left" style="font-size:11px;color:#8b949e">${detail}</td></tr>`;
+    });
+    html+='</tbody></table></div>';
+  }
+
+  html+='</div>';
+  html+=buildDiffHTML(prevRecords,records);
+  html+=buildSummaryHTML(records);
+  document.getElementById('item-result').innerHTML=html;
+  document.getElementById('item-search-card').style.display='';
+  prevRecords=records;
+}
+
+// ── Search ──
+function searchItem(){
+  const q=document.getElementById('item-search').value.trim();
+  if(!q){document.getElementById('item-search-result').innerHTML='';return;}
+  const res=document.getElementById('item-search-result');
+
+  const matches=Object.entries(itemDB).filter(([id])=>id===q||id.includes(q));
+  if(!matches.length){
+    res.innerHTML=`<div style="color:#8b949e;font-size:13px">找不到 item_id 含「${q}」的商品</div>`;
+    return;
+  }
+
+  let html=`<div style="color:#8b949e;font-size:12px;margin-bottom:8px">找到 ${matches.length} 種商品</div>`;
+
+  matches.slice(0,5).forEach(([id,info])=>{
+    const prices=[...new Set(info.entries.filter(e=>e.point!=='9').map(e=>e.point))];
+    const qtys=[...new Set(info.entries.map(e=>e.item_num.trim()))];
+    const pBad=prices.length>1, qBad=qtys.length>1;
+
+    html+=`<div class="card" style="margin-bottom:10px;padding:14px">
+      <div style="display:flex;gap:10px;align-items:baseline;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:#e6edf3">item_id: ${id}</span>
+        ${pBad?'<span style="background:#3d1a1a;color:#ff7b72;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">price 不一致</span>':''}
+        ${qBad?'<span style="background:#3d1a1a;color:#ff7b72;border-radius:4px;padding:1px 7px;font-size:11px;font-weight:700">qty 不一致</span>':''}
+      </div>
+      <div style="overflow-x:auto"><table class="dt" style="margin-top:0">
+      <thead><tr><th>#</th><th>group</th><th>index</th><th>item_num</th><th>point</th><th>special</th><th>sell</th><th>on_date</th><th>off_date</th><th>acct_limit</th></tr></thead>
+      <tbody>`;
+    info.entries.forEach((e,i)=>{
+      const pDiff=pBad&&i>0&&e.point!==info.entries[0].point;
+      const qDiff=qBad&&i>0&&e.item_num!==info.entries[0].item_num;
+      html+=`<tr>
+        <td style="color:#8b949e">${e.lineNum}</td>
+        <td>${e.item_group}</td><td>${e.item_index}</td>
+        <td style="${qDiff?'color:#ff7b72;font-weight:700':''}">${e.item_num}</td>
+        <td style="${pDiff?'color:#ff7b72;font-weight:700':pBad?'':'color:#56d364'}">${e.point}${e.special_price!=='0'?` <span style="color:#e3b341;font-size:10px">特:${e.special_price}</span>`:''}</td>
+        <td>${e.special_price}</td>
+        <td>${e.sell==='1'?'✅':'⬛'}</td>
+        <td style="font-size:11px">${e.on_date||'-'}</td>
+        <td style="font-size:11px">${e.off_date||'-'}</td>
+        <td>${e.acct_limit}</td>
+      </tr>`;
+    });
+    html+='</tbody></table></div></div>';
+  });
+  res.innerHTML=html;
+}
+
+// ── Diff vs previous paste ──
+function buildDiffHTML(prev,curr){
+  if(!prev.length)return'';
+  const prevMap={},currMap={};
+  prev.forEach(r=>{prevMap[`${r.item_group}|${r.item_index}|${r.money_unit}`]=r;});
+  curr.forEach(r=>{currMap[`${r.item_group}|${r.item_index}|${r.money_unit}`]=r;});
+
+  const added=curr.filter(r=>!prevMap[`${r.item_group}|${r.item_index}|${r.money_unit}`]);
+  const removed=prev.filter(r=>!currMap[`${r.item_group}|${r.item_index}|${r.money_unit}`]);
+  const changed=[];
+  curr.forEach(r=>{
+    const p=prevMap[`${r.item_group}|${r.item_index}|${r.money_unit}`];
+    if(!p)return;
+    const diffs=[];
+    if(r.point!==p.point)       diffs.push({f:'point（點數）',old:p.point,nw:r.point});
+    if(r.item_num!==p.item_num) diffs.push({f:'item_num（數量）',old:p.item_num,nw:r.item_num});
+    if(r.sell!==p.sell)         diffs.push({f:'sell（上架）',old:p.sell,nw:r.sell});
+    if(r.special_price!==p.special_price) diffs.push({f:'special_price（特價）',old:p.special_price,nw:r.special_price});
+    if(r.on_date!==p.on_date)   diffs.push({f:'on_date（上架時間）',old:p.on_date,nw:r.on_date});
+    if(r.off_date!==p.off_date) diffs.push({f:'off_date（下架時間）',old:p.off_date,nw:r.off_date});
+    if(diffs.length)changed.push({r,diffs});
+  });
+
+  if(!added.length&&!removed.length&&!changed.length)
+    return`<div class="card"><div class="card-title">🔄 與上次對比</div>${alertBox('pass','與上次貼入內容完全相同，無任何變更')}</div>`;
+
+  let h=`<div class="card"><div class="card-title">🔄 與上次對比</div>
+  <div class="row" style="gap:8px;margin-bottom:14px">
+    <div style="background:#0c2d1a;border:1px solid #2ea043;border-radius:6px;padding:7px 14px;font-size:12px;color:#56d364;font-weight:600">＋ 新增 ${added.length} 筆</div>
+    <div style="background:#3d1a1a;border:1px solid #f85149;border-radius:6px;padding:7px 14px;font-size:12px;color:#ff7b72;font-weight:600">－ 移除 ${removed.length} 筆</div>
+    <div style="background:#2d2100;border:1px solid #d29922;border-radius:6px;padding:7px 14px;font-size:12px;color:#e3b341;font-weight:600">✏️ 修改 ${changed.length} 筆</div>
+  </div>`;
+
+  if(added.length){
+    h+=`<div class="section-head">新增（${added.length}）</div><div class="issue-list">`;
+    added.forEach(r=>{
+      h+=`<div class="issue-item ok"><span class="badge ok">新增</span>
+        <span>item_id=<b>${r.item_id}</b> | group=${r.item_group} index=${r.item_index} | 數量=${r.item_num} 點數=${r.point} ${r.sell==='1'?'✅上架':'⬛下架'}</span></div>`;
+    });
+    h+='</div>';
+  }
+
+  if(removed.length){
+    h+=`<div class="section-head">移除（${removed.length}）</div><div class="issue-list">`;
+    removed.forEach(r=>{
+      h+=`<div class="issue-item err"><span class="badge err">移除</span>
+        <span>item_id=<b>${r.item_id}</b> | group=${r.item_group} index=${r.item_index} | 數量=${r.item_num} 點數=${r.point}</span></div>`;
+    });
+    h+='</div>';
+  }
+
+  if(changed.length){
+    h+=`<div class="section-head">修改（${changed.length}）</div>
+    <div style="overflow-x:auto"><table class="dt">
+    <thead><tr><th>item_id</th><th>group</th><th>index</th><th>欄位</th><th>舊值</th><th>→ 新值</th></tr></thead><tbody>`;
+    changed.forEach(({r,diffs})=>{
+      diffs.forEach((d,i)=>{
+        h+=`<tr>
+          <td>${i===0?`<b>${r.item_id}</b>`:''}</td>
+          <td>${i===0?r.item_group:''}</td>
+          <td>${i===0?r.item_index:''}</td>
+          <td style="color:#8b949e">${d.f}</td>
+          <td style="color:#ff7b72">${d.old||'(空)'}</td>
+          <td style="color:#56d364;font-weight:600">${d.nw||'(空)'}</td>
+        </tr>`;
+      });
+    });
+    h+='</tbody></table></div>';
+  }
+
+  return h+'</div>';
+}
+
+// ── Item summary table ──
+function buildSummaryHTML(records){
+  if(!records.length)return'';
+  const fmtDate=s=>{
+    if(!s||s==='0')return'-';
+    s=s.replace(/\s/g,'');
+    if(s.length===10)return`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)} ${s.slice(8,10)}時`;
+    return s;
+  };
+  let h=`<div class="card"><div class="card-title">📋 品項清單（${records.length} 筆）</div>
+  <div style="overflow-x:auto"><table class="dt">
+  <thead><tr>
+    <th>#</th><th>item_id</th><th>類別</th><th>排序</th>
+    <th>數量</th><th>點數</th><th>特價</th>
+    <th>上架</th><th>上架時間</th><th>下架時間</th><th>備註</th>
+  </tr></thead><tbody>`;
+  records.forEach((r,i)=>{
+    const isSell=r.sell==='1';
+    const hasSpecial=r.special_price&&r.special_price!=='0';
+    h+=`<tr>
+      <td style="color:#8b949e">${i+1}</td>
+      <td><b style="color:#e6edf3">${r.item_id}</b></td>
+      <td>${r.item_group}</td>
+      <td>${r.item_index}</td>
+      <td style="color:#c9d1d9;font-weight:600">${r.item_num}</td>
+      <td style="color:#56d364;font-weight:600">${r.point}</td>
+      <td>${hasSpecial?`<span style="color:#e3b341;font-weight:600">${r.special_price}</span>`:'-'}</td>
+      <td>${isSell?'<span style="color:#56d364">✅ 上架</span>':'<span style="color:#484f58">⬛ 下架</span>'}</td>
+      <td style="font-size:11px;color:#8b949e">${fmtDate(r.on_date)}</td>
+      <td style="font-size:11px;color:#8b949e">${fmtDate(r.off_date)}</td>
+      <td class="left" style="font-size:11px;color:#8b949e;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.note||''}">${r.note||'-'}</td>
+    </tr>`;
+  });
+  return h+'</tbody></table></div></div>';
+}
+
+// ──────────────────────────────────────────────────────────
+// REVENUE TRACKER
+// ──────────────────────────────────────────────────────────
+const DAY_DIST=[
+  {name:'週三',pct:31.1},{name:'週四',pct:17.9},{name:'週五',pct:14.1},
+  {name:'週六',pct:9.7},{name:'週日',pct:10.8},{name:'週一',pct:9.3},{name:'週二',pct:7.1},
+];
+
+function initRevenue(){
+  const today=new Date();
+  const diff=((today.getDay()-3)+7)%7;
+  const wed=new Date(today);
+  wed.setDate(today.getDate()-diff);
+  document.getElementById('rev-date').value=wed.toISOString().split('T')[0];
+  buildRevTable();
+}
+
+function buildRevTable(){
+  const startStr=document.getElementById('rev-date').value;
+  if(!startStr)return;
+  const start=new Date(startStr+'T00:00:00');
+  const tbody=document.getElementById('rev-tbody');
+  tbody.innerHTML='';
+  DAY_DIST.forEach((d,i)=>{
+    const dt=new Date(start);
+    dt.setDate(start.getDate()+i);
+    const dlbl=`${dt.getMonth()+1}/${String(dt.getDate()).padStart(2,'0')}`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${dlbl}</td><td>${d.name}</td><td>${d.pct}%</td>
+      <td id="rt-${i}" style="color:#8b949e">-</td>
+      <td><input class="day-inp" id="ra-${i}" type="number" placeholder="-" min="0" step="0.01"
+        oninput="updateRevenue()"></td>
+      <td id="rdiff-${i}">-</td>
+      <td id="rct-${i}" style="color:#8b949e">-</td>
+      <td id="rca-${i}" style="color:#8b949e">-</td>`;
+    tbody.appendChild(tr);
+  });
+  updateRevenue();
+}
+
+function updateRevenue(){
+  const tw=parseFloat(document.getElementById('rev-target').value)||null;
+  const tt=tw?tw*10000:null;
+  let cumT=0,cumA=0,fp=0,fa=0;
+  DAY_DIST.forEach((d,i)=>{
+    const dt=tt?(tt*d.pct/100):null;
+    cumT+=dt||0;
+    const raw=document.getElementById('ra-'+i).value;
+    const av=raw===''?null:parseFloat(raw)*10000;
+    if(av!==null){cumA+=av;fp+=d.pct;fa+=av;}
+    document.getElementById('rt-'+i).textContent=dt?((dt/10000).toFixed(2)+'萬'):'-';
+    const de=document.getElementById('rdiff-'+i);
+    if(av!==null&&dt!==null){
+      const diff=av-dt;
+      de.textContent=(diff>=0?'+':'')+(diff/10000).toFixed(2)+'萬';
+      de.style.color=diff>=0?'#56d364':'#ff7b72';
+    }else{de.textContent='-';de.style.color='';}
+    document.getElementById('rct-'+i).textContent=tt?((cumT/10000).toFixed(2)+'萬'):'-';
+    document.getElementById('rca-'+i).textContent=cumA>0?((cumA/10000).toFixed(2)+'萬'):'-';
+  });
+  renderRevSummary(tt,fa,fp,cumA);
+}
+
+function renderRevSummary(tt,fa,fp,ca){
+  const el=document.getElementById('rev-summary');
+  if(fa===0&&!tt){el.innerHTML='';return;}
+  const proj=fp>0?(fa/(fp/100)):null;
+  const gap=proj&&tt?(proj-tt):null;
+  const pp=tt&&fa?Math.min(fa/tt*100,120):null;
+  const ppp=proj&&tt?Math.min(proj/tt*100,120):null;
+  let h=`<div class="card"><div class="card-title">📊 本週摘要</div><div class="stat-grid">`;
+  h+=`<div class="stat"><div class="stat-lbl">目前累計</div>
+    <div class="stat-val">${(fa/10000).toFixed(2)}<small>萬</small></div>
+    ${pp!==null?`<div class="pbar"><div class="${pp>=100?'pfill-g':'pfill-r'}" style="width:${Math.min(pp,100)}%"></div></div>
+    <div class="stat-sub">目標 ${(tt/10000).toFixed(2)}萬 的 ${pp.toFixed(1)}%</div>`:''}
+  </div>`;
+  if(proj){
+    const gc=!gap?'':(gap>=0?'c-green':'c-red');
+    h+=`<div class="stat"><div class="stat-lbl">預計最終（速率推算）</div>
+      <div class="stat-val ${gc}">${(proj/10000).toFixed(2)}<small>萬</small></div>
+      ${gap!==null?`<div class="pbar"><div class="${proj>=tt?'pfill-g':'pfill-r'}" style="width:${Math.min(ppp,100)}%"></div></div>
+      <div class="stat-sub ${gc}">${gap>=0?'↑ 超出':'↓ 短缺'} ${Math.abs(gap/10000).toFixed(2)}萬</div>`:''}
+    </div>`;
+  }
+  if(tt)h+=`<div class="stat"><div class="stat-lbl">週目標</div>
+    <div class="stat-val">${(tt/10000).toFixed(2)}<small>萬</small></div>
+    <div class="stat-sub">尚需 <span style="color:${tt-fa<=0?'#56d364':'#e3b341'}">${(Math.max(tt-fa,0)/10000).toFixed(2)}萬</span></div>
+  </div>`;
+  if(fp>0)h+=`<div class="stat"><div class="stat-lbl">已填累積占比</div>
+    <div class="stat-val">${fp.toFixed(1)}<small>%</small></div>
+    <div class="stat-sub">剩餘 ${(100-fp).toFixed(1)}%</div>
+  </div>`;
+  h+='</div></div>';
+  el.innerHTML=h;
+}
+
+// Init
+initRevenue();
+</script>
+</body>
+</html>
